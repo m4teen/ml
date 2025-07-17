@@ -239,5 +239,235 @@ replicability of the relationship as we vary our sample, which may suggest that
 the relationship between the features and target is ephemeral and noisy, so 
 any forecast or inference made using it will be unreliable.
 
+\subsection{Multiple Linear Regression}
+
+\subsubsection*{Model Definition}
+
+Multiple linear regression generalises simple linear regression by modelling a response variable $Y$ as a linear combination of multiple predictors $X_1, \dots, X_p$:
+
+\[
+\hat{Y} = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \dots + \theta_p X_p = \mathbf{X}\boldsymbol{\theta}
+\]
+
+where:
+\begin{itemize}
+    \item $\mathbf{X}$ is the design matrix including a column of ones for the intercept,
+    \item $\boldsymbol{\theta}$ is the parameter vector including $\theta_0$ (intercept) and $\theta_1, \dots, \theta_p$ (slopes).
+\end{itemize}
+For $p = 1$, the model defines a line as with the usual linear regression, 
+for $p = 2$, the model defines a plane, 
+for $p > 2$, the model defines a hyperplane in $\mathbb{R}^{p+1}$.
+
+\subsubsection*{Estimation via Least Squares}
+
+As before the $\boldsymbol{\theta}$ coefficients are the population 
+coefficients, but in reality we can only estimate these. 
+These are the sample coefficients $\boldsymbol{\hat{\theta}}$ which are obtained by minimising the 
+mean squared error (MSE), but there is no closed form solution 
+to this minimisation problem and so numerical methods are used.
+For large datasets, 
+iterative methods such as gradient descent can also be used to minimise MSE.
+
+\subsubsection*{Prediction and Residuals}
+
+Predictions for a new data point $\mathbf{x}$ are given by:
+
+\[
+\hat{y} = \mathbf{x}^\top \boldsymbol{\hat{\theta}}
+\]
+The residual error for observation $i$ is:
+
+\[
+\varepsilon_i = y_i - \hat{y}_i
+\]
+The squared residuals are used in minimising the MSE and finding the 
+optimim sample coefficients.
+\subsubsection*{Model Complexity and Overfitting}
+
+Including more variables increases model flexibility but can lead to overfitting, 
+where the model captures noise rather than signal. A balance is needed:
+\begin{itemize}
+    \item Remove redundant, highly correlated (collinear) variables.
+    \item Choose variables that are interpretable, uncorrelated, and strongly related to $Y$.
+\end{itemize}
+
+\subsubsection*{Categorical Variables}
+
+Categorical predictors must be encoded numerically:
+\begin{itemize}
+    \item Binary variables: encoded as $0/1$.
+    \item Multiclass variables: use one-hot encoding (create a dummy variable for each class).
+\end{itemize}
+
+\subsubsection*{What-If Analysis}
+
+The model can be used for counterfactual predictions by altering input features. However, what-if analysis may be invalid if:
+\begin{itemize}
+    \item Scenarios lie far outside the training data (extrapolation),
+    \item Variables are collinear — changing one realistically requires changing another.
+\end{itemize}
+
+\subsection{Logistic Regression}
+
+\subsubsection*{Model Definition}
+
+Logistic regression models the probability that a 
+binary outcome $Y \in \{0, 1\}$ occurs, 
+given features $X_1, \dots, X_p$. The 
+model assumes that the log-odds (logit) of the 
+probability is a linear function of the input:
+
+\[
+\log\left( \frac{\mathbb{P}(Y = 1 \mid X)}{\mathbb{P}(Y = 0 \mid X)} \right) = \theta_0 + \theta_1 X_1 + \dots + \theta_p X_p = \mathbf{X}^\top \boldsymbol{\theta}
+\]
+Solving for the probability gives the sigmoid function:
+
+\[
+\hat{p} = \mathbb{P}(Y = 1 \mid X) = \sigma(\mathbf{X}^\top \boldsymbol{\theta}) = \frac{1}{1 + e^{-\mathbf{X}^\top \boldsymbol{\theta}}}
+\]
+This maps the linear combination of features to the 
+interval $(0, 1)$, giving a probability.
+
+\subsubsection*{Learning the Parameters}
+
+To fit the model onto data we use maximum likelihood estimation to learn 
+the $\boldsymbol{\theta}$ parameters. The optimal parameters $\boldsymbol{\hat{\theta}}$ are found by solving:
+
+\[
+\boldsymbol{\hat{\theta}} = \arg\min_{\boldsymbol{\theta}} \mathcal{J}(\boldsymbol{\theta})
+\]
+
+where $\mathcal{J}$ is negative log likelihood. 
+This optimisation is typically performed using gradient descent or related numerical techniques.
+
+\subsubsection*{Prediction and Decision Boundary}
+
+The model returns a probability $\hat{p}$. To make a classification, we 
+choose a threshold $\tau \in (0,1)$ (which is usually $\tau = 0.5$) and define:
+
+\[
+\hat{Y} = 
+\begin{cases}
+1 & \text{if } \hat{p} \geq \tau \\
+0 & \text{otherwise}
+\end{cases}
+\]
+This tells us that if $\mathbb{P}(Y=1|X)<0.5$ then $\hat{Y}$ is 
+classified as belonging to class $0$. The threshold can be fine tuned 
+to match reality, since most phenomena are not cleanly 50:50. For example 
+fraud may occur one time out of 99 so using a 0.5 threshold would clearly 
+be unwise since it would class everything as not-fraud.
+\subsubsection*{Interpretability}
+
+Each coefficient $\theta_j$ measures the change 
+in the log-odds of $Y = 1$ for a unit increase in $X_j$, 
+holding other variables fixed. Larger magnitudes indicate stronger influence. Importantly,
+this allows us to conduct inference involving 
+continuous change on a discrete classification problem.
+
+
+\subsubsection*{Use Cases}
+
+Logistic regression is used when:
+\begin{itemize}
+    \item The target variable is binary.
+    \item Probabilities, not just classifications, are required.
+    \item Model interpretability is important.
+\end{itemize}
+
+\subsection{Nonlinear and Polynomial Regression}
+
+\subsubsection*{Motivation}
+
+In many real-world datasets, the relationship between features $X$ and the 
+target $Y$ is not well captured by a straight line. Nonlinear regression models are used when such relationships require curvature or more complex forms.
+
+\subsubsection*{Nonlinear Regression: Definition}
+
+Nonlinear regression models the relationship between $Y$ and the 
+inputs $X_1, \dots, X_p$ via a nonlinear function:
+
+\[
+\hat{Y} = f(X_1, \dots, X_p; \boldsymbol{\theta})
+\]
+
+where $f$ is nonlinear in its parameters $\boldsymbol{\theta}$. Common forms include:
+\begin{itemize}
+    \item Exponential: $\hat{Y} = \theta_0 e^{\theta_1 X}$
+    \item Logarithmic: $\hat{Y} = \theta_0 + \theta_1 \log(X)$
+    \item Sinusoidal: $\hat{Y} = \theta_0 + \theta_1 \sin(\theta_2 X)$
+\end{itemize}
+
+\subsubsection*{Polynomial Regression}
+
+Polynomial regression models $Y$ as an $n$-th degree polynomial in a single variable $X$:
+
+\[
+\hat{Y} = \theta_0 + \theta_1 X + \theta_2 X^2 + \dots + \theta_n X^n
+\]
+This model is nonlinear in the input but linear in the parameters, so it can be recast as:
+
+\[
+\hat{Y} = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \dots + \theta_n X_n
+\]
+where $X_k = X^k$, allowing the use of ordinary least squares.
+
+\subsubsection*{Fitting and Optimisation}
+
+For models linear in parameters (e.g., polynomial), parameters $\boldsymbol{\theta}$ can be fitted using standard linear regression:
+
+\[
+\boldsymbol{\hat{\theta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{Y}
+\]
+For truly nonlinear models, where $f$ is nonlinear in $\boldsymbol{\theta}$, closed-form solutions do not exist. Instead, we minimise a loss (usually MSE) using iterative optimisation techniques, such as:
+
+\[
+\boldsymbol{\hat{\theta}} = \arg\min_{\boldsymbol{\theta}} \sum_{i=1}^n (y_i - f(x_i; \boldsymbol{\theta}))^2
+\]
+This is solved numerically using algorithms like gradient descent.
+
+\subsubsection*{Model Selection and Overfitting}
+
+Polynomial models of high degree can always perfectly fit any 
+finite dataset (interpolate all points), but this leads to overfitting. 
+Overfit models capture noise rather than signal.
+
+\subsubsection*{Visual Model Selection}
+
+To identify whether a nonlinear model is needed:
+\begin{itemize}
+    \item Plot scatter diagrams of $Y$ vs. $X_i$
+    \item Look for nonlinearity (e.g., curvature, saturation, periodicity)
+    \item Choose candidate functions: polynomial, exponential, logarithmic, etc.
+\end{itemize}
+
+\subsubsection*{Examples of Nonlinear Forms}
+
+\begin{itemize}
+    \item Exponential growth: GDP, investment returns
+    \item Logarithmic growth: Diminishing returns in productivity
+    \item Sinusoidal: Seasonal patterns, temperature cycles
+\end{itemize}
+
+\subsubsection*{Beyond Parametric Forms}
+
+When no closed-form function is known, or when relationships are nonlinear 
+and defy any known non-linear archetypes, meaning we cannot 
+hope to represent the relationship via some standard paremetric, mathematical 
+equation, we require more 
+advanced methods such as
+\begin{itemize}
+    \item Decision trees
+    \item Random forests
+    \item Support vector machines
+    \item Neural networks
+    \item $k$-nearest neighbours
+    \item Gradient boosting
+\end{itemize}
+
+These are non-parametric regressors that adapt to complex patterns 
+without requiring an explicit functional form.
+
+\section{Tree-based methods}
 
 \end{document}
