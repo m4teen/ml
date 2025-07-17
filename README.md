@@ -19,15 +19,14 @@ This course provides a practical introduction to machine learning using Python, 
 
 ```bash
 .
-├── notes/                      # LaTeX source files for course notes
-│   ├── main.tex
-│   └── sections/
-│       ├── supervised.tex
-│       ├── unsupervised.tex
-│       └── ...
-├── assignments/                # Python notebooks and scripts for graded assignments
+├── latex/                      # LaTeX notes for the course
+│   ├── notes.tex              # LaTeX source file
+│   └── notes.pdf 
+├── notebooks/                # Python notebooks for graded assignments
 │   ├── assignment1.ipynb
 │   └── ...
+├── data/                       # Datasets used by notebooks
+│   └── example.csv             
 ├── README.md
 ├── .gitignore
 └── requirements.txt
