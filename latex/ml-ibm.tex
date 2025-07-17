@@ -163,7 +163,7 @@ with open("model.pkl", "wb") as f:
 
 Regression is a type of supervised learning model. It models a relationship between 
 a continuous target variable and explanatory features.
-\subsection{Introduction to Regression}
+\subsection{Linear Regression}
 
 
 \subsubsection*{Definition}
@@ -173,7 +173,6 @@ Linear regression models the relationship between a response variable $Y$ and on
 \[
 Y \approx \beta_0 + \beta_1 X
 \]
-
 where $\beta_0$ is the intercept and $\beta_1$ is the slope.
 
 \subsubsection*{Coefficient Estimation}
@@ -468,6 +467,472 @@ advanced methods such as
 These are non-parametric regressors that adapt to complex patterns 
 without requiring an explicit functional form.
 
-\section{Tree-based methods}
+\section{Tree-based Methods}
+
+\subsection{Decision Trees}
+
+
+A \textbf{decision tree} is a 
+supervised learning algorithm used for classification. 
+It models decisions as a tree-like structure, where:
+
+\begin{itemize}
+    \item Internal nodes represent tests on input features,
+    \item Branches represent outcomes of those tests,
+    \item Leaf nodes assign a class (for classification) or a value (for regression).
+\end{itemize}
+The flow from root to leaf encodes a sequence of decisions that leads to a prediction.
+
+\subsubsection*{Training: Recursive Partitioning}
+
+A decision tree is trained by recursively partitioning the feature space to reduce uncertainty in the target variable. The training process proceeds as follows:
+
+\begin{enumerate}
+    \item Start with all training data at the root.
+    \item At each node:
+    \begin{itemize}
+        \item Evaluate all possible feature-based splits,
+        \item Select the split that maximally reduces impurity,
+        \item Partition the data accordingly and assign subsets to new child nodes.
+    \end{itemize}
+    \item Repeat recursively for each child node.
+    \item Stop splitting when:
+    \begin{itemize}
+        \item All samples in a node belong to the same class,
+        \item No features remain,
+        \item A stopping condition is met.
+    \end{itemize}
+\end{enumerate}
+This process is known as \textbf{recursive binary splitting}.
+
+\subsubsection*{Split Selection Criteria}
+
+At each node, the goal is to select the feature and threshold that most reduces the impurity of the child nodes.
+
+\textbf{1. Entropy (Information Gain)}:  
+Entropy measures the randomness of the class distribution:
+\[
+\text{Entropy}(t) = -\sum_{k} p_k \log_2(p_k)
+\]
+where $p_k$ is the proportion of class $k$ in node $t$. The split that maximises the \textbf{Information Gain} is chosen:
+\[
+\text{IG} = \text{Entropy(parent)} - \sum_i \frac{n_i}{n} \cdot 
+\text{Entropy(child}_i)
+\]
+
+\textbf{2. Gini Impurity}:  
+An alternative impurity metric defined as:
+\[
+\text{Gini}(t) = 1 - \sum_{k} p_k^2
+\]
+Lower Gini implies purer nodes i.e more optimally split nodes. The best split minimises weighted Gini impurity.
+
+\subsubsection*{Stopping and Pruning}
+
+To avoid overfitting, tree growth must be controlled.
+\begin{enumerate}
+    \item \textbf{Pre-pruning (early stopping)}:  
+Stop growing the tree when:
+\begin{itemize}
+    \item Maximum tree depth is reached,
+    \item A minimum number of samples per node or per leaf is exceeded,
+    \item A maximum number of leaves is reached.
+\end{itemize}
+\item \textbf{Post-pruning (reduction)}:  
+Grow the full tree, then prune branches that do not improve performance on a validation set.
+
+\end{enumerate}
+
+
+
+Pruning simplifies the model, improves generalisation, and increases interpretability.
+
+\subsubsection*{Interpretability}
+
+Decision trees are highly interpretable models:
+\begin{itemize}
+    \item They can be visualised as flowcharts,
+    \item Feature importance is revealed by the order of splits,
+    \item Each path from root to leaf corresponds to a decision rule.
+\end{itemize}
+
+\subsection{Regression Trees}
+
+
+A \textbf{regression tree} is a variant of the decision tree used for predicting continuous target variables rather than categorical labels. While classification trees assign inputs to discrete classes, regression trees predict a numerical value, typically by averaging the target values in a leaf node.
+
+\subsubsection*{Problem Setup}
+
+\begin{itemize}
+    \item \textbf{Classification tree:} Target variable $Y$ is categorical; prediction is a class label.
+    \item \textbf{Regression tree:} Target variable $Y$ is continuous; prediction is a real number $\hat{y}$.
+\end{itemize}
+The structure of the tree is the same as in classification: internal nodes represent decisions on input features, branches correspond to outcomes of those decisions, and leaves output predictions.
+
+\subsubsection*{Training: Recursive Splitting}
+
+The tree is built recursively by splitting the data to reduce variability in the target variable. At each node:
+
+\begin{enumerate}
+    \item For each feature, evaluate candidate thresholds to split the data into left and right subsets.
+    \item For each candidate split, compute the \textbf{Mean Squared Error (MSE)}:
+    \[
+    \text{MSE}(t) = \frac{1}{n_t} \sum_{i=1}^{n_t} (y_i - \bar{y}_t)^2
+    \]
+    where $n_t$ is the number of observations in node $t$, and $\bar{y}_t$ is the mean of their target values.
+
+    \item Compute the \textbf{weighted average MSE} of the split:
+    \[
+    \text{Split MSE} = \frac{n_L}{n} \text{MSE}_L + \frac{n_R}{n} \text{MSE}_R
+    \]
+    where $n_L$ and $n_R$ are the sample sizes in the left and right nodes respectively.
+
+    \item Select the feature and threshold with the lowest split MSE.
+    \item Recurse on child nodes until a stopping criterion is met.
+\end{enumerate}
+
+\subsubsection*{Prediction Rule}
+
+At inference time, each data point traverses the tree until it reaches a leaf. The predicted value $\hat{y}$ is:
+
+\[
+\hat{y} = \frac{1}{n_{\text{leaf}}} \sum_{i \in \text{leaf}} y_i
+\]
+Other statistics (e.g., median) can be used if the target distribution is skewed, though the mean is most common due to computational efficiency.
+
+\subsubsection*{Split Evaluation for Feature Types}
+
+\begin{itemize}
+    \item \textbf{Continuous features:} Trial thresholds $\alpha$ are defined as midpoints between sorted unique values. Exhaustive search yields the threshold that minimises weighted MSE.
+    \item \textbf{Binary features:} Simply split on the two categories and compute the resulting split MSE.
+    \item \textbf{Multi-class features:} Use strategies like one-vs-one or one-vs-all to reduce to binary splits, and evaluate each using the same MSE criterion.
+\end{itemize}
+
+\subsubsection*{Stopping Criteria and Pruning}
+
+As with classification trees, growth can be controlled using:
+
+\begin{itemize}
+    \item Maximum depth,
+    \item Minimum samples per node or per leaf,
+    \item Maximum number of leaves.
+\end{itemize}
+\textbf{Post-pruning} may also be applied to remove splits that do not significantly reduce prediction error on a validation set.
+
+\subsubsection*{Applications}
+
+Regression trees are widely used in domains requiring interpretable predictions of continuous outcomes, such as:
+
+\begin{itemize}
+    \item Forecasting revenue,
+    \item Predicting temperature or energy usage,
+    \item Modelling medical risk scores or patient vitals,
+    \item Estimating economic indicators.
+\end{itemize}
+
+\section{Support Vector Machines (SVM)}
+
+
+
+Support Vector Machines (SVM) are supervised learning algorithms used for both classification and regression. The central idea is to represent data in a high-dimensional space and construct a separating hyperplane that best divides the data into classes (or fits a continuous target variable, in the case of regression).
+
+\subsection{Linear SVM for Binary Classification}
+
+\subsubsection*{Geometric Interpretation}
+
+In the binary classification setting, SVM aims to find the optimal
+ hyperplane that separates the data into two classes with the maximum margin. 
+ Given two linearly separable classes, the separating hyperplane is defined as:
+
+\[
+\mathbf{w}^\top \mathbf{x} + b = 0
+\]
+where $\mathbf{w}$ is the normal vector to the hyperplane, and $b$ is the bias. The margin is the distance from the hyperplane to the nearest data point of 
+either class. The points that lie closest to the hyperplane are called 
+\textbf{support vectors}.
+
+\subsubsection*{Optimisation Objective}
+
+The optimisation problem is:
+
+\[
+\min_{\mathbf{w}, b} \frac{1}{2} \|\mathbf{w}\|^2
+\quad \text{subject to} \quad
+y_i(\mathbf{w}^\top \mathbf{x}_i + b) \geq 1 \quad \forall i
+\]
+This formulation ensures that all points are correctly classified w
+ith a margin of at least 1, and $\|\mathbf{w}\|$ is minimised, thereby maximising the margin.
+
+\subsubsection*{Soft Margin SVM}
+
+In real-world data, perfect separation is mostly not possible. \textbf{Soft margin SVM} introduces slack variables to allow misclassifications:
+
+\[
+\min_{\mathbf{w}, b, \xi} \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^n \xi_i
+\quad \text{subject to} \quad
+y_i(\mathbf{w}^\top \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0
+\]
+The parameter $C > 0$ controls the trade-off between maximising the margin and penalising misclassified points.
+
+\subsection{Kernels and Nonlinear Decision Boundaries}
+
+When data is not linearly separable in its original feature space, 
+SVM employs the \textbf{kernel trick} to implicitly map data 
+into a higher-dimensional space where a linear separation is possible.
+Common kernels include:
+
+\begin{itemize}
+    \item \textbf{Linear kernel:} $K(\mathbf{x}, \mathbf{x}') = \mathbf{x}^\top \mathbf{x}'$
+    \item \textbf{Polynomial kernel:} $K(\mathbf{x}, \mathbf{x}') = (\mathbf{x}^\top \mathbf{x}' + c)^d$
+    \item \textbf{Radial Basis Function (RBF) kernel:} $K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\|^2\right)$
+    \item \textbf{Sigmoid kernel:} $K(\mathbf{x}, \mathbf{x}') = \tanh(\alpha \mathbf{x}^\top \mathbf{x}' + c)$
+\end{itemize}
+These enable SVM to construct complex, nonlinear decision boundaries while retaining convex optimisation.
+
+\subsection{Support Vector Regression (SVR)}
+
+SVM can also be adapted for regression tasks through \textbf{Support Vector Regression (SVR)}.
+
+\subsubsection*{Idea}
+
+Instead of trying to classify, SVR aims to fit a function that deviates from the observed targets by no more than a user-defined threshold $\varepsilon$. The region within which no penalty is applied is called the \textbf{$\varepsilon$-tube}.
+
+\subsubsection*{Optimisation Formulation}
+
+The optimisation objective becomes:
+
+\[
+\min_{\mathbf{w}, b, \xi, \xi^*} \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^n (\xi_i + \xi_i^*)
+\]
+subject to:
+
+\[
+\begin{aligned}
+y_i - \mathbf{w}^\top \mathbf{x}_i - b &\leq \varepsilon + \xi_i \\
+\mathbf{w}^\top \mathbf{x}_i + b - y_i &\leq \varepsilon + \xi_i^* \\
+\xi_i, \xi_i^* &\geq 0
+\end{aligned}
+\]
+Here, $\varepsilon$ controls the tolerance zone, and $C$ balances flatness vs tolerance of errors.
+
+\subsection{Advantages and Limitations}
+
+\textbf{Advantages:}
+\begin{itemize}
+    \item Effective in high-dimensional spaces.
+    \item Robust to overfitting (especially with margin control).
+    \item Flexible via kernel functions for nonlinear problems.
+\end{itemize}
+
+\textbf{Limitations:}
+\begin{itemize}
+    \item Training can be slow on large datasets.
+    \item Sensitive to noisy data and overlapping classes.
+    \item Performance depends heavily on kernel and hyperparameter selection.
+\end{itemize}
+
+\subsection{Use Cases}
+
+SVMs are widely used in:
+
+\begin{itemize}
+    \item Image classification (e.g., digit recognition)
+    \item Spam filtering
+    \item Text and sentiment analysis
+    \item Speech recognition and anomaly detection
+    \item Bioinformatics and pattern recognition
+\end{itemize}
+
+\section{K-Nearest Neighbours (KNN)}
+
+
+K-Nearest Neighbours (KNN) is a supervised learning algorithm used for both classification and regression. It operates on the assumption that data points close to one another in the feature space are likely to share similar labels. Unlike other models, KNN is a \textbf{lazy learner}: it does not build an explicit model during training but instead stores the dataset and performs computation at prediction time.
+
+\subsection{Algorithmic Procedure}
+
+Given a value of $k$, and a new data point (the \textit{query}), the KNN algorithm proceeds as follows:
+
+\begin{enumerate}
+    \item Compute the distance from the query point to all labelled training data.
+    \item Select the $k$ nearest data points.
+    \item \textbf{Classification:} predict the class that occurs most frequently among the $k$ neighbours (majority vote).
+    \item \textbf{Regression:} predict the average (or median) of the target values of the $k$ neighbours.
+\end{enumerate}
+
+Common distance metrics include Euclidean, Manhattan, and Chebyshev distance (the 
+$p$-norms with $p=2,1,\infty$). The choice of metric affects the neighbourhood 
+geometry and, hence, prediction accuracy.
+
+\subsection{Decision Boundary}
+
+The \textbf{decision boundary} of a KNN classifier is shaped by the spatial distribution of training data. For low values of $k$, the boundary is highly irregular, following the noise in the data. As $k$ increases, the boundary becomes smoother, leading to more generalised predictions.
+
+\subsection{Hyperparameter Tuning and Bias–Variance Trade-off}
+
+\begin{itemize}
+    \item \textbf{Small $k$:} Low bias, high variance. The model is highly sensitive to noise (overfitting).
+    \item \textbf{Large $k$:} High bias, low variance. The model smooths over fine details (underfitting).
+\end{itemize}
+The optimal $k$ is usually found via cross-validation.
+
+\subsection{Feature Scaling and Relevance}
+
+KNN is sensitive to the scale of features because distance metrics are directly affected by magnitude. Features should be standardised (e.g., via z-score normalisation) before applying KNN. Furthermore, including irrelevant or redundant features can degrade performance:
+
+\begin{itemize}
+    \item Noisy features increase the required $k$ to achieve stability.
+    \item Irrelevant features dilute meaningful distances.
+    \item Domain knowledge is crucial in selecting relevant features.
+\end{itemize}
+
+\subsection{Weighted KNN}
+
+To address issues such as class imbalance or outliers, \textbf{distance-weighted KNN} assigns weights to neighbours inversely proportional to their distance from the query point. Closer points have greater influence:
+
+\[
+w_i = \frac{1}{d(x, x_i)^2}
+\]
+where $x$ is the query point and $x_i$ is a neighbour.
+
+\subsection{Regression with KNN}
+
+In KNN regression, predictions are made by averaging the target values of the $k$ nearest neighbours:
+
+\[
+\hat{y} = \frac{1}{k} \sum_{i=1}^{k} y_i
+\]
+
+This can be modified to a weighted average using distance-based weights to reduce the influence of distant neighbours.
+
+\subsection{Advantages and Limitations}
+
+\textbf{Advantages:}
+\begin{itemize}
+    \item Simple, intuitive, and easy to implement.
+    \item Naturally handles multi-class classification.
+    \item No training phase; all computation is deferred until prediction.
+\end{itemize}
+
+\textbf{Limitations:}
+\begin{itemize}
+    \item Computationally expensive at prediction time.
+    \item Sensitive to feature scaling and irrelevant features.
+    \item Poor performance on high-dimensional data due to the curse of dimensionality.
+\end{itemize}
+
+\subsection{Use Cases}
+
+KNN is well-suited to:
+
+\begin{itemize}
+    \item Pattern recognition (e.g., handwritten digit classification)
+    \item Recommender systems
+    \item Medical diagnosis (e.g., classifying patient symptoms)
+    \item Anomaly detection
+\end{itemize}
+\section{Bias--Variance Tradeoff and Ensemble Methods}
+
+\subsection{Bias and Variance: An Intuitive Framework}
+
+The concepts of \textbf{bias} and \textbf{variance} describe two key sources of error in supervised learning models.
+
+\begin{itemize}
+    \item \textbf{Bias} measures the error introduced by approximating a complex real-world function with a simpler model. High bias models tend to underfit the data.
+    \item \textbf{Variance} measures the model's sensitivity to fluctuations in the training data. High variance models tend to overfit.
+\end{itemize}
+
+
+\subsection{Prediction Bias and Variance}
+
+\begin{itemize}
+    \item \textbf{Prediction bias} quantifies the average deviation of model predictions from the true target values. A model with zero bias produces predictions that are, on average, correct.
+    \item \textbf{Prediction variance} quantifies how much 
+    model predictions vary across different samples. 
+    High variance reflects a model that overfits on ephemera.
+\end{itemize}
+
+
+\subsection{The Tradeoff and Model Complexity}
+
+As model complexity increases:
+\begin{itemize}
+    \item Bias decreases, since the model can fit training data more closely.
+    \item Variance increases, since the model becomes sensitive to fluctuations and noise in the data.
+\end{itemize}
+
+The \textbf{bias–variance tradeoff} captures the tension between underfitting and overfitting. The optimal model lies at the point where the sum of squared bias and variance is minimized, balancing generalization and flexibility.
+
+\subsection{Weak vs Strong Learners}
+
+\begin{itemize}
+    \item A \textbf{weak learner} is a model that performs slightly better than random guessing. It typically exhibits \textit{high bias} and \textit{low variance}.
+    \item A \textbf{strong learner} performs significantly better but often exhibits \textit{low bias} and \textit{high variance}.
+\end{itemize}
+
+Decision trees are frequently used as weak learners in ensemble methods due to their tunable bias–variance properties.
+
+\subsection{Ensemble Methods}
+
+\textbf{Ensemble learning} combines multiple models (often weak learners) to produce a stronger predictor. Two primary techniques are \textbf{bagging} and \textbf{boosting}, which address bias and variance in different ways.
+
+\subsubsection{Bagging (Bootstrap Aggregating)}
+
+Bagging reduces variance without substantially increasing bias.
+
+\begin{itemize}
+    \item It trains multiple base models (e.g., decision trees) on \textit{bootstrap samples} of the data.
+    \item The final prediction is the average (for regression) or majority vote (for classification) of the base models.
+\end{itemize}
+
+Bagging benefits from the law of large numbers: averaging multiple high-variance models leads to a lower-variance aggregate.
+
+\paragraph{Random Forests}
+
+Random Forests are a popular implementation of bagging:
+\begin{itemize}
+    \item A large number of decision trees are trained on different bootstrap samples.
+    \item During training, each node considers only a random subset of features.
+    \item Final predictions are aggregated across trees.
+\end{itemize}
+
+This strategy further decorrelates the trees and reduces overfitting.
+
+\subsubsection{Boosting}
+
+Boosting reduces bias by sequentially training models that correct the errors of their predecessors.
+
+\begin{itemize}
+    \item Each weak learner is trained on a modified dataset, with higher weights given to previously misclassified examples.
+    \item The final model is a weighted sum of all learners.
+\end{itemize}
+
+Boosting increases model complexity iteratively, making it capable of approximating complex functions.
+
+\paragraph{Popular Boosting Algorithms}
+\begin{itemize}
+    \item \textbf{AdaBoost:} Emphasizes misclassified examples by increasing their weights.
+    \item \textbf{Gradient Boosting:} Models the residuals of prior models using gradient descent.
+    \item \textbf{XGBoost:} An efficient and scalable implementation of gradient boosting.
+\end{itemize}
+
+\subsection{Comparison of Bagging and Boosting}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Aspect} & \textbf{Bagging} & \textbf{Boosting} \\
+\hline
+Goal & Reduce variance & Reduce bias \\
+Model training & Parallel & Sequential \\
+Data sampling & Bootstrap (random) & Weighted (focused on errors) \\
+Learner type & High variance, low bias & Low variance, high bias \\
+Overfitting risk & Lower & Higher (if not regularized) \\
+Example & Random Forests & AdaBoost, XGBoost \\
+\hline
+\end{tabular}
+\end{table}
+
+
 
 \end{document}
