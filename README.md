@@ -23,10 +23,11 @@ This course provides a practical introduction to machine learning using Python, 
 │   ├── notes.tex              # LaTeX source file
 │   └── notes.pdf 
 ├── notebooks/                # Python notebooks for graded assignments
-│   ├── assignment1.ipynb
+│   ├── assignment.ipynb
 │   └── ...
 ├── data/                       # Datasets used by notebooks
-│   └── example.csv             
+│   ├── data.ipynb
+│   └── ...          
 ├── README.md
 ├── .gitignore
 └── requirements.txt
