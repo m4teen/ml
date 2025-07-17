@@ -1,0 +1,242 @@
+\documentclass[9pt]{extarticle} 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}          %
+\usepackage{microtype}       
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{mathtools}        % More powerful math extensions
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{tikz}             % Drawing diagrams
+\usepackage{booktabs}         % Nicer tabl
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+\usepackage[nameinlink]{cleveref} % Smarter cross-referencing
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\newcommand{\notimplies}{%
+  \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
+\usetikzlibrary{arrows.meta, positioning}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Machine Learning with Python}
+\rhead{\today}
+\cfoot{\thepage}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{theorem}[definition]{Theorem}
+
+\usepackage{tikz-cd}
+\begin{document}
+\begin{titlepage}
+    Machine Learning with Python 
+\end{titlepage}
+\tableofcontents
+\newpage
+\section{Overview}
+
+Machine learning is a subset of AI that uses 
+computer algorithms that require feature engineering.  It 
+teaches computers to learn from data and identify patterns and use 
+them to make decisions without receiving explicit input 
+from the user. There are three main types of machine learning models:
+\begin{enumerate}
+    \item Supervised learning models are trained on a known 
+set of features and a target variable, to identify 
+relationships which are then used for inference or 
+forecasting on new data. For example: linear regression. 
+    \item Unsupervised learning 
+    models do not admit labelled feature-target style data, instead 
+    they are trained on a set of variables which are all 
+    considered features; the model finds relationships between these features. For 
+    example: Principal Component Analysis.
+    \item Reinforcement learning models simulate an AI agent interacting 
+with its environment, they learn how to make decisions based on 
+feedback from the environment. For example:
+\end{enumerate}
+
+
+The two focuses of supervised learning are regression and classification
+One of the main types of unsupervised learning are clustering
+
+\subsection{Machine Learning Lifecycle}
+
+\begin{enumerate}
+    \item \textbf{Problem Definition:} Clearly state the objective and desired outcome.
+    
+    \item \textbf{Data Collection:} Identify required data and its source.
+    
+    \item \textbf{Data Preparation:} Clean the data, handle missing values, normalize if necessary, engineer features, and perform exploratory data analysis. Split into training and testing sets.
+    
+    \item \textbf{Model Development:} Train the model, tune hyperparameters, and evaluate performance using appropriate metrics.
+    
+    \item \textbf{Deployment:} Integrate the trained model into a production environment.
+\end{enumerate}
+
+
+\subsection{Difference between a Data Scientist and AI Engineer} 
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|p{3.5cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Aspect} & \textbf{Data Science} & \textbf{AI Engineering} \\
+\hline
+\textbf{Primary Use Cases} & Descriptive and predictive analytics (e.g., EDA, clustering, regression, classification) & Prescriptive and generative AI (e.g., optimisation, recommendation systems, intelligent assistants) \\
+\hline
+\textbf{Data Type Focus} & Primarily structured/tabular data, cleaned and preprocessed & Primarily unstructured data (text, images, audio, video), used at large scale \\
+\hline
+\textbf{Model Characteristics} & Narrow-scope ML models, smaller in size, domain-specific, faster to train & Foundation models, large-scale, general-purpose, high compute and data requirements \\
+\hline
+\textbf{Development Process} & Data-driven model development (feature engineering, training, validation) & Application of pre-trained models with prompt engineering, PEFT, and RAG frameworks \\
+\hline
+\end{tabular}
+\caption{Key Differences Between Data Science and AI Engineering}
+\end{table}
+
+
+\subsection{Tools for Machine Learning}
+
+Python has several modules that handle the different stages of the 
+machine learning model development pipeline:
+\begin{enumerate}
+    \item Data preprocessing: \texttt{pysql}, \texttt{pandas}
+    \item Exploratory data analysis: \texttt{pandas}, \texttt{numpy}, \texttt{matplotlib}
+    \item Optimisation: \texttt{scipy}
+    \item Implementation: \texttt{scikit-learn} (supervised and unsupervised methods), 
+    \texttt{keras}, \texttt{pytorch} (deep learing)
+\end{enumerate}
+
+\subsection{Scikit-learn}
+
+The basic syntax for using supervised learning models in \texttt{scikit-learn} follows a standard workflow:
+
+\begin{enumerate}
+    \item \textbf{Split the data:}
+    \begin{verbatim}
+x_train, X_test, y_train, y_test = train_test_split(X, y, test_size=...)
+    \end{verbatim}
+
+    \item \textbf{Import and initialise the model:}
+    \begin{verbatim}
+from sklearn import svm
+model = svm.SVC(...)
+    \end{verbatim}
+
+    \item \textbf{Train the model:}
+    \begin{verbatim}
+model.fit(X_train, y_train)
+    \end{verbatim}
+
+    \item \textbf{Make predictions:}
+    \begin{verbatim}
+predictions = model.predict(X_test)
+    \end{verbatim}
+
+    \item \textbf{Evaluate performance:}
+    Use a confusion matrix to assess classification accuracy:
+    \begin{verbatim}
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_test, predictions)
+    \end{verbatim}
+
+    \item \textbf{Optional – Save the model:}
+    You can serialise the trained model using \texttt{pickle}:
+    \begin{verbatim}
+import pickle
+with open("model.pkl", "wb") as f:
+    pickle.dump(model, f)
+    \end{verbatim}
+    Whether this step is necessary depends on the context and industry practice.
+\end{enumerate}
+
+\section{Linear Regression}
+
+Regression is a type of supervised learning model. It models a relationship between 
+a continuous target variable and explanatory features.
+\subsection{Introduction to Regression}
+
+
+\subsubsection*{Definition}
+
+Linear regression models the relationship between a response variable $Y$ and one or more features $X_1, \dots, X_p$. In the case of simple linear regression with one predictor $X$, the model assumes:
+
+\[
+Y \approx \beta_0 + \beta_1 X
+\]
+
+where $\beta_0$ is the intercept and $\beta_1$ is the slope.
+
+\subsubsection*{Coefficient Estimation}
+
+Given training data $(x_1, y_1), \dots, (x_n, y_n)$, the goal is to estimate the coefficients $\beta_0, \beta_1$ such that the fitted values are as close as possible to the observed values. This is done by minimizing a norm of the residual vector:
+
+\[
+\beta_{\text{min}} = \arg\min_{\beta \in \mathbb{R}^2} \| \mathbf{Y} - \mathbf{X} \beta \|_p^p
+\]
+
+For ordinary least squares (OLS), we use the $2$-norm ($p=2$), 
+leading to the minimisation of the residual sum of squares (RSS). 
+The OLS solution yields closed-form expressions for $\hat{\beta}_0$ and 
+$\hat{\beta}_1$.
+ For least absolute deviations (LAD), we take $p = 1$. 
+ For Chebyshev or minimax regression, we take $p = \infty$, minimising the maximum residual.
+
+
+\subsubsection*{Population vs Sample Regression}
+
+In the real world we almost always do not have a maximal data set. 
+This means that we do not have data for every single item in the population, 
+all we can hope to obtain are samples. 
+The fitted regression line from a 
+sample \textit{estimates} the \emph{population regression line}:
+
+\[
+Y = \beta_0 + \beta_1 X + \varepsilon
+\]
+
+
+where $\varepsilon$ is the irreducible error due to unobserved factors. Since we cannot observe the full population, we fit the model on a sample and obtain estimates $\hat{\beta}_0, \hat{\beta}_1$.
+However, since we only observe a sample, the estimates $\hat{\beta}$ vary
+from sample to sample\footnote{
+ The goal of statistical inference is to understand 
+how close $\hat{\beta}$ is to the true $\beta$ and quantify this uncertainty.}.
+The sample regression is thus an estimate of the population regression. 
+If we had access to all population data, the OLS minimisation would yield the true $\beta_0$, $\beta_1$.
+
+
+\subsubsection*{Sampling and the Central Limit Theorem}
+
+Across repeated samples of size $n$, we obtain different estimates of $\beta$, say $\hat{\beta}^{(1)}, \dots, \hat{\beta}^{(n)}$. Their average converges to the true coefficient $\bar{\beta}$ as $n \to \infty$, due to the central limit theorem:
+
+\[
+\hat{\beta} - \bar{\beta} \xrightarrow{d} \mathcal{N}(0, \sigma_*)
+\]
+
+\subsubsection*{Standard Error and Inference}
+
+The variance of the coefficient estimates across samples is the \emph{standard error}:
+
+$$SE(\hat{\beta}_i) = f(\sigma^2, x_j, \bar{x})$$
+
+where $\sigma^2$ is estimated from the data via:
+
+\[
+\hat{\sigma}^2 = \frac{RSS}{n - 2}
+\]
+The standard error quantifies the variability of the estimated coefficient 
+under repeated sampling. If we observe a high standard error then it means that we do not see 
+replicability of the relationship as we vary our sample, which may suggest that 
+the relationship between the features and target is ephemeral and noisy, so 
+any forecast or inference made using it will be unreliable.
+
+\end{document}
