@@ -18,9 +18,12 @@ This course provides a practical introduction to machine learning using Python, 
 
 ## Example output
 
-![Feature Importance](images/odds-ratio.png)
-![Linear Regression](images/lin-reg.png)
-![Feature Analysis](images/bin.png)(images/cont.png)
+<p align="center">
+  <img src="images/odds-ratio.png" alt="Feature Importance" width="350"/>
+  <img src="images/lin-reg.png" alt="Linear Regression" width="350"/>
+  <img src="images/bin.png" alt="Feature Analysis - Binary" width="350"/>
+  <img src="images/cont.png" alt="Feature Analysis - Continuous" width="350"/>
+</p>
 
 
 ## Repository Structure
