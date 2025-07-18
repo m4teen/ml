@@ -15,7 +15,7 @@ This course provides a practical introduction to machine learning using Python, 
 - Decision Trees & Random Forests
 - K-Means & Hierarchical Clustering
 
-### Reproducibility
+## Reproducibility
 
 All datasets used in this project are publicly available and accessible via URL, requiring no local uploads. Each notebook includes the necessary code to download and process the data automatically. As such, cloning this repository and installing the dependencies listed in `requirements.txt` is sufficient to fully reproduce the results and visualisations.
 
