@@ -934,5 +934,221 @@ Example & Random Forests & AdaBoost, XGBoost \\
 \end{table}
 
 
+\section{Unsupervised Learning}
+
+Unlike supervised learning, \textbf{unsupervised learning} deals with data that has no labels. The objective is to uncover hidden patterns, structures, or relationships within the data without any prior supervision. One of the most commonly used unsupervised learning algorithms is \textbf{K-Means Clustering}.
+
+\subsection{K-Means Clustering}
+
+K-Means is an iterative, centroid-based clustering algorithm that partitions a dataset into $k$ non-overlapping clusters. It groups data points based on their similarity, measured via distance to cluster centroids.
+
+\subsubsection{Objective}
+
+The aim of K-Means is to minimise the \textit{within-cluster sum of squares (WCSS)}, defined as:
+
+\[
+\sum_{i=1}^k \sum_{\mathbf{x} \in C_i} \lVert \mathbf{x} - \boldsymbol{\mu}_i \rVert^2
+\]
+
+where $C_i$ is the $i$-th cluster and $\boldsymbol{\mu}_i$ is its centroid (mean).
+
+\subsubsection{Algorithm Steps}
+
+\begin{enumerate}
+    \item Choose the number of clusters $k$.
+    \item Initialise $k$ centroids randomly.
+    \item Assign each data point to the nearest centroid using a distance metric (typically Euclidean).
+    \item Recalculate the centroids as the mean of all points assigned to each cluster.
+    \item Repeat steps 3 and 4 until convergence (i.e., centroids no longer move or a maximum number of iterations is reached).
+\end{enumerate}
+
+\subsubsection{Convergence and Performance}
+
+K-Means typically converges quickly and scales well to large datasets. However, performance is highly sensitive to:
+\begin{itemize}
+    \item Initialisation of centroids
+    \item The value of $k$
+    \item Presence of noise or outliers
+    \item Cluster shape and balance
+\end{itemize}
+
+\subsubsection{Assumptions and Limitations}
+
+\begin{itemize}
+    \item Assumes clusters are convex and roughly equal in size.
+    \item Sensitive to outliers and noise, as variance-based measures are easily distorted.
+    \item Performs poorly when clusters differ significantly in size or density.
+    \item Not suitable for discovering non-convex clusters.
+\end{itemize}
+
+\subsubsection{Visual Example and Convergence}
+
+During convergence, centroids move to minimise intra-cluster distances. For example, in a dataset with two circular clusters, initial centroids placed randomly may gradually shift towards the true cluster centres over several iterations. Convergence is reached when the assignments no longer change.
+
+\subsubsection{Choosing the Number of Clusters}
+
+Selecting an appropriate $k$ is non-trivial, especially in high-dimensional space. Common heuristic methods include:
+
+\begin{itemize}
+    \item \textbf{Elbow Method:} Plot WCSS against $k$ and look for the “elbow” point where additional clusters yield diminishing returns.
+    \item \textbf{Silhouette Score:} Measures cohesion vs separation. Values close to 1 indicate well-separated clusters.
+    \item \textbf{Davies-Bouldin Index:} Lower values indicate better clustering, based on intra- and inter-cluster distances.
+\end{itemize}
+
+\subsubsection{Imbalanced and Overlapping Clusters}
+
+K-Means struggles with:
+\begin{itemize}
+    \item \textbf{Imbalanced clusters:} Smaller clusters may be absorbed into larger ones.
+    \item \textbf{Overlapping clusters:} When clusters are not well-separated, K-Means can mislabel data points.
+    \item \textbf{Incorrect $k$:} If $k$ is too small or too large, the resulting clustering may not reflect the true structure of the data.
+\end{itemize}
+
+
+\subsection{DBSCAN and HDBSCAN}
+
+\textbf{DBSCAN} (Density-Based Spatial Clustering of Applications with Noise) is a density-based clustering algorithm that identifies clusters as dense regions of points separated by areas of lower density. Unlike centroid-based methods (e.g., K-Means), DBSCAN does not assume convex cluster shapes and does not require the user to specify the number of clusters in advance.
+
+\subsubsection{Core Concepts}
+
+DBSCAN requires two key parameters:
+\begin{itemize}
+    \item $\varepsilon$ (epsilon): the radius defining a neighbourhood around a point.
+    \item \texttt{minPts}: the minimum number of points required to form a dense region.
+\end{itemize}
+
+Based on these, each point is classified as one of the following:
+\begin{itemize}
+    \item \textbf{Core Point:} A point with at least \texttt{minPts} points (including itself) within its $\varepsilon$-neighbourhood.
+    \item \textbf{Border Point:} A point that lies within the $\varepsilon$-neighbourhood of a core point but is not itself a core point.
+    \item \textbf{Noise Point:} A point that does not belong to the $\varepsilon$-neighbourhood of any core point.
+\end{itemize}
+
+\subsubsection{How DBSCAN Works}
+
+\begin{enumerate}
+    \item Select an arbitrary unvisited point.
+    \item Retrieve its $\varepsilon$-neighbourhood.
+    \item If it contains at least \texttt{minPts}, start a new cluster.
+    \item Expand the cluster by recursively visiting all $\varepsilon$-neighbours of core points.
+    \item Label remaining unvisited points as noise.
+\end{enumerate}
+
+This approach allows DBSCAN to:
+\begin{itemize}
+    \item Discover clusters of arbitrary shape and size.
+    \item Identify and exclude outliers or noisy data points.
+    \item Avoid the need to predefine the number of clusters.
+\end{itemize}
+
+However, DBSCAN has limitations:
+\begin{itemize}
+    \item Sensitive to the choice of $\varepsilon$ and \texttt{minPts}.
+    \item Struggles with datasets containing varying densities.
+\end{itemize}
+
+\subsubsection{Example}
+
+In the case of two interlocking half-moon shapes (a common synthetic dataset), DBSCAN successfully separates the shapes using density rather than geometric assumptions. Core points within each moon shape form clusters, border points are appended, and outliers are excluded.
+
+\subsubsection{HDBSCAN: Hierarchical DBSCAN}
+
+\textbf{HDBSCAN} (Hierarchical DBSCAN) is an extension of DBSCAN that improves upon its weaknesses. It eliminates the need to set $\varepsilon$ manually and adapts to varying local densities.
+
+Key features include:
+\begin{itemize}
+    \item Builds a hierarchy of clusters by varying the density threshold.
+    \item Selects the most stable clusters via \textit{persistence}, a measure of how long a cluster exists as density thresholds change.
+    \item More robust to noise and better at identifying meaningful clusters of different densities.
+\end{itemize}
+
+\subsubsection{How HDBSCAN Works}
+
+\begin{enumerate}
+    \item Each point starts as its own cluster.
+    \item A mutual reachability graph is built, using distance scaled by local density.
+    \item Clusters are merged in a hierarchical fashion as the density threshold decreases.
+    \item A condensed cluster tree is produced by pruning low-stability branches.
+\end{enumerate}
+
+\subsubsection{DBSCAN vs HDBSCAN}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Aspect} & \textbf{DBSCAN} & \textbf{HDBSCAN} \\
+\hline
+Input parameters & $\varepsilon$, \texttt{minPts} & \texttt{min\_cluster\_size}, \texttt{min\_samples} \\
+Cluster shapes & Arbitrary & Arbitrary \\
+Density adaptation & Fixed & Variable (adaptive) \\
+Handles noise & Yes & Yes (better) \\
+Requires $\varepsilon$ & Yes & No \\
+Scalability & Good & Moderate \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection{Use Case: Canadian Museums}
+
+When applied to spatial data such as latitudes and longitudes of Canadian museums, DBSCAN was able to detect natural geographic clusters but struggled in high-density urban areas by lumping many points together. HDBSCAN, with adaptive neighbourhood sizing, successfully identified finer structures and revealed multiple clusters within dense metropolitan regions.
+
+\subsection{Dimensionality Reduction}
+
+Dimensionality reduction refers to techniques that reduce the number of features in a dataset while preserving essential information. High-dimensional data can be challenging to visualise and computationally expensive to process. These methods aim to project the data into a lower-dimensional space that captures the structure, variance, or similarity relationships inherent in the original data.
+
+Popular dimensionality reduction algorithms include:
+\begin{itemize}
+    \item Principal Component Analysis (PCA)
+    \item t-Distributed Stochastic Neighbour Embedding (t-SNE)
+    \item Uniform Manifold Approximation and Projection (UMAP)
+\end{itemize}
+
+\subsubsection{Principal Component Analysis (PCA)}
+
+Principal Component Analysis is a linear technique that assumes the features in a dataset are linearly correlated. PCA projects the data onto a new coordinate system defined by orthogonal directions called \textit{principal components}, which are ordered by the amount of variance they capture from the original data.
+
+\begin{itemize}
+    \item The first principal component captures the direction of maximum variance.
+    \item Subsequent components are orthogonal and capture decreasing amounts of variance.
+    \item PCA transforms the original features into a reduced set of uncorrelated variables.
+\end{itemize}
+
+PCA is effective when the structure in the data is linear and often used for noise reduction and feature compression.
+
+\subsubsection{t-Distributed Stochastic Neighbour Embedding (t-SNE)}
+
+t-SNE is a non-linear dimensionality reduction algorithm particularly suited for high-dimensional data such as text and image features.
+
+\begin{itemize}
+    \item It maps the data into two or three dimensions by preserving the local similarity between points.
+    \item Points that are close in the high-dimensional space remain close in the low-dimensional embedding.
+    \item Distant points are given less emphasis in the optimisation.
+\end{itemize}
+
+Despite its ability to reveal hidden clusters, t-SNE has limitations:
+\begin{itemize}
+    \item High computational cost and poor scalability.
+    \item Sensitivity to hyperparameters such as perplexity and learning rate.
+\end{itemize}
+
+\subsubsection{Uniform Manifold Approximation and Projection (UMAP)}
+
+UMAP is a more recent non-linear method that improves upon the limitations of t-SNE by incorporating manifold learning.
+
+\begin{itemize}
+    \item It constructs a graph in the original space assuming that the data lies on a low-dimensional manifold.
+    \item A second graph is constructed in low dimensions to preserve the local and global structure of the original data.
+    \item UMAP generally scales better and produces more meaningful embeddings for large and complex datasets.
+\end{itemize}
+
+\subsubsection{Comparison Example}
+
+To illustrate the comparative behaviour of these algorithms, consider a synthetic dataset comprising four Gaussian blobs generated in three dimensions. The blobs vary slightly in their standard deviations, resulting in slight overlaps between some clusters.
+
+\textbf{PCA:} Since the blobs are linearly separable, PCA performs well, projecting the clusters into 2D while retaining the primary directions of variance.
+
+\textbf{t-SNE:} The algorithm identifies four well-separated clusters but introduces minor misclassifications, particularly where original clusters overlap. t-SNE is effective at revealing local structure but can distort global relationships.
+
+\textbf{UMAP:} UMAP recovers most of the cluster structure while preserving both local and global features. It outperforms t-SNE in this case by better maintaining the density structure of the original data.
 
 \end{document}
