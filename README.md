@@ -15,6 +15,14 @@ This course provides a practical introduction to machine learning using Python, 
 - Decision Trees & Random Forests
 - K-Means & Hierarchical Clustering
 
+
+## Example output
+
+![Feature Importance](images/odds-ratio.png)
+![Linear Regression](images/lin-reg.png)
+![Feature Analysis](images/bin.png)(images/cont.png)
+
+
 ## Repository Structure
 
 ```bash
