@@ -1151,4 +1151,389 @@ To illustrate the comparative behaviour of these algorithms, consider a syntheti
 
 \textbf{UMAP:} UMAP recovers most of the cluster structure while preserving both local and global features. It outperforms t-SNE in this case by better maintaining the density structure of the original data.
 
+\section{Evaluating Models}
+\subsection{Supervised Learning}
+\subsubsection{Classification}
+
+Supervised learning evaluation measures how effectively a machine learning model can predict outcomes on unseen data. This process is crucial for assessing a model's generalisation capability. Evaluation occurs during both the training and testing phases, ensuring that the model does not merely memorise the training data but captures patterns that extend to new inputs.
+
+A standard approach is the \textit{train-test split}, where the dataset is divided into two subsets:
+\begin{itemize}
+    \item \textbf{Training set:} Typically 70--80\% of the data, used to train the model.
+    \item \textbf{Test set:} The remaining 20--30\%, used to evaluate model performance on unseen data.
+\end{itemize}
+
+In classification tasks, the model predicts categorical labels. Evaluation metrics compare these predicted labels to the true labels to assess performance.
+
+\paragraph{Accuracy}
+
+Accuracy is the proportion of correctly predicted instances:
+\[
+\text{Accuracy} = \frac{\text{Number of correct predictions}}{\text{Total number of predictions}}
+\]
+
+\paragraph{Confusion Matrix}
+
+A confusion matrix provides a more detailed breakdown:
+\begin{itemize}
+    \item \textbf{True Positives (TP):} Correctly predicted positive instances.
+    \item \textbf{True Negatives (TN):} Correctly predicted negative instances.
+    \item \textbf{False Positives (FP):} Incorrectly predicted as positive.
+    \item \textbf{False Negatives (FN):} Incorrectly predicted as negative.
+\end{itemize}
+
+\paragraph{Precision}
+
+Precision is the ratio of true positives to all predicted positives:
+\[
+\text{Precision} = \frac{\text{TP}}{\text{TP + FP}}
+\]
+This metric is important when the cost of false positives is high (e.g.\ in recommendation systems).
+
+\paragraph{Recall}
+
+Recall measures the ability of the model to detect actual positives:
+\[
+\text{Recall} = \frac{\text{TP}}{\text{TP + FN}}
+\]
+It is critical when the cost of false negatives is high (e.g.\ in medical diagnostics).
+
+\paragraph{F1 Score}
+
+The F1 score is the harmonic mean of precision and recall:
+\[
+\text{F1 Score} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision + Recall}}
+\]
+It is useful when precision and recall are equally important.
+
+\paragraph{Example: Iris Classification}
+
+Using the \texttt{KNeighborsClassifier} on the \texttt{Iris} dataset, one can evaluate classification performance with a confusion matrix and associated metrics for each class: \texttt{setosa}, \texttt{versicolor}, and \texttt{virginica}. A heat map of the confusion matrix visualises correct and incorrect predictions. In a well-performing model, diagonal entries (correct classifications) will dominate.
+
+\paragraph{Class-Specific Metrics}
+
+Precision, recall, and F1 scores can be computed per class. A weighted average accounts for class imbalance by weighting each metric according to the number of samples in that class.
+
+
+
+\subsubsection{Regression}
+
+Regression models aim to predict continuous numerical values. However, these predictions are not exact and typically involve some degree of error. Evaluation of regression models is therefore essential to assess how well the model approximates true outcomes.
+
+Let us consider an example: predicting final exam scores based on midterm results. A regression line is fit to the data, and the differences between the actual grades and the predicted values form the model's \textit{errors}. These errors, also called residuals, quantify the deviation between the fitted model and the observed data.
+
+Formally, for a dataset $\{(x_i, y_i)\}_{i=1}^n$, with predictions $\hat{y}_i$ from the model, several error-based metrics are used to quantify the quality of fit.
+
+\paragraph{Mean Absolute Error (MAE)}
+
+The MAE measures the average magnitude of the errors:
+\[
+\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |\hat{y}_i - y_i|
+\]
+
+\paragraph{Mean Squared Error (MSE)}
+
+The MSE penalises larger errors more heavily by squaring the differences:
+\[
+\text{MSE} = \frac{1}{n - p} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
+\]
+where $p$ is the number of model parameters.
+
+\paragraph{Root Mean Squared Error (RMSE)}
+
+The RMSE is the square root of the MSE and is often preferred because it shares the same units as the target variable:
+\[
+\text{RMSE} = \sqrt{\text{MSE}} = \sqrt{ \frac{1}{n - p} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2 }
+\]
+
+\paragraph{Coefficient of Determination ($R^2$)}
+
+The $R^2$ score measures the proportion of variance in the target variable explained by the model:
+\[
+R^2 = 1 - \frac{\sum_{i=1}^{n} (\hat{y}_i - y_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
+\]
+An $R^2$ value of 1 indicates perfect prediction, while 0 means the model performs no better than simply predicting the mean $\bar{y}$ of the observed data. Negative values imply that the model performs worse than the mean-value predictor.
+
+\paragraph{Explained Variance}
+
+Explained variance quantifies the amount of variation captured by the model:
+\[
+\text{Explained Variance} = \frac{\sum_{i=1}^{n} (\hat{y}_i - \bar{y})^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
+\]
+It is closely related to $R^2$ and equals $1$ for perfect predictions.
+
+\paragraph{Interpreting Metrics}
+
+\begin{itemize}
+    \item A lower MAE, MSE, and RMSE indicate smaller prediction errors.
+    \item A higher $R^2$ or explained variance reflects a better model fit.
+    \item RMSE is sensitive to outliers due to the squaring operation.
+    \item MAE is more robust to outliers.
+    \item $R^2$ may be misleading for non-linear relationships.
+\end{itemize}
+
+\paragraph{Example: Effect of Transformations}
+
+Consider fitting a linear model to a target variable following a log-normal distribution. Transformations such as the logarithm or Box-Cox improve linearity. Visually, this causes the data to cluster more closely around the best-fit line. Consequently, error metrics (MAE, MSE, RMSE) decrease, and $R^2$ increases, reflecting improved model performance.
+
+
+\subsection{Unsupervised Learning}
+
+Evaluating unsupervised learning models presents distinct challenges, as there are no predefined labels or ground truths to compare against. Unlike supervised learning, the goal is to uncover hidden structures or patterns within the data. Evaluation focuses on the coherence, separability, and stability of these patterns.
+
+\paragraph{Challenges and Importance}
+
+Without target labels, unsupervised model evaluation relies heavily on heuristic metrics, domain-specific insights, and qualitative analysis. A good model should group similar points into coherent clusters and preserve the essential structure of the data, even under perturbations. \textit{Stability} refers to a model's ability to produce consistent clusters across variations in the dataset.
+
+Effective evaluation therefore involves a multifaceted approach combining:
+\begin{itemize}
+    \item Internal evaluation metrics
+    \item External evaluation metrics (when labels are available)
+    \item Visual inspection and dimensionality reduction
+    \item Domain expertise
+    \item Model stability analysis
+\end{itemize}
+
+\subsubsection*{Evaluating Clustering Models}
+
+Clustering aims to partition data into homogeneous groups. Its evaluation typically relies on either internal or external metrics.
+
+\paragraph{Internal Evaluation Metrics}
+
+These metrics assess clustering quality based solely on the data and the resulting cluster structure:
+\begin{itemize}
+    \item \textbf{Silhouette Score:}
+    \[
+    s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}} \in [-1, 1]
+    \]
+    where $a(i)$ is the average intra-cluster distance and $b(i)$ is the lowest average inter-cluster distance. Higher scores indicate better separation and cohesion.
+    
+    \item \textbf{Davies-Bouldin Index (DBI):} Measures average similarity between clusters:
+    \[
+    \text{DBI} = \frac{1}{k} \sum_{i=1}^{k} \max_{j \ne i} \left( \frac{\sigma_i + \sigma_j}{d(c_i, c_j)} \right)
+    \]
+    where $\sigma_i$ is the average distance of points in cluster $i$ to its centroid $c_i$, and $d$ is the distance between centroids. Lower values indicate better clustering.
+    
+    \item \textbf{Inertia:} Also called within-cluster sum of squares:
+    \[
+    \text{Inertia} = \sum_{i=1}^{k} \sum_{x \in C_i} \|x - \mu_i\|^2
+    \]
+    where $\mu_i$ is the centroid of cluster $C_i$. Lower values imply tighter clusters.
+\end{itemize}
+
+\paragraph{External Evaluation Metrics}
+
+When ground-truth labels are available, these metrics compare predicted cluster assignments to true labels:
+\begin{itemize}
+    \item \textbf{Adjusted Rand Index (ARI):} Measures similarity between clustering and ground truth:
+    \[
+    \text{ARI} \in [-1, 1], \quad 1 = \text{perfect match}, \quad 0 = \text{random}, \quad < 0 = \text{worse than random}
+    \]
+    
+    \item \textbf{Normalized Mutual Information (NMI):}
+    \[
+    \text{NMI}(U, V) = \frac{2 \cdot I(U; V)}{H(U) + H(V)} \in [0, 1]
+    \]
+    where $I$ is mutual information and $H$ is entropy. Measures shared information between cluster labels and true classes.
+    
+    \item \textbf{Fowlkes–Mallows Index (FMI):}
+    \[
+    \text{FMI} = \sqrt{\frac{TP}{TP + FP} \cdot \frac{TP}{TP + FN}}
+    \]
+    A geometric mean of precision and recall for clustering results.
+\end{itemize}
+
+\paragraph{Visualization and Dimensionality Reduction}
+
+Scatter plots of dimensionality-reduced data help qualitatively assess clustering. Techniques include:
+\begin{itemize}
+    \item \textbf{PCA:} Projects data onto orthogonal principal components. The \textit{explained variance ratio} indicates how much information is retained in each component.
+    \item \textbf{t-SNE and UMAP:} Nonlinear methods that preserve local structure. Evaluation includes:
+        \begin{itemize}
+            \item \textit{Reconstruction Error:} Measures how well the original data can be recovered.
+            \item \textit{Neighborhood Preservation:} Assesses retention of local relationships.
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Case Study: K-Means Clustering}
+
+Simulated blob data with varying separability is clustered using K-Means. The following patterns emerge:
+\begin{itemize}
+    \item Clear separation results in high silhouette scores (e.g., $s = 0.84$) and low DBI ($= 0.22$).
+    \item Poor separation yields lower silhouette scores ($\approx 0.58$) and higher DBI.
+    \item Increasing $k$ reduces inertia but may lead to over-segmentation.
+\end{itemize}
+
+
+
+
+
+\section{Model Generalisability}
+
+\subsection{Model Validation}
+
+\section{Model Generalisability}
+\subsection{Model Validation}
+
+Model validation is a critical component in the development of machine learning models. Its primary goal is to ensure that a model generalizes well to unseen data, rather than merely fitting the training data. This process safeguards against overfitting, particularly during the tuning of hyperparameters, and helps assess how well a model will perform in practical, real-world scenarios.
+
+\subsubsection*{Motivation}
+
+Many machine learning models come with hyperparameters—settings that must be chosen prior to training and which directly affect model performance. If one naively tunes hyperparameters based on performance on the test set, this effectively fits the model to the test data, compromising its role as an unbiased benchmark. This practice, known as \textit{data snooping} or a form of \textit{data leakage}, leads to overfitting and invalidates test set performance as an estimator of real-world generalisation.
+
+\subsubsection*{Train-Validation-Test Split}
+
+To address this, model validation requires a disciplined separation of data:
+\begin{itemize}
+    \item \textbf{Training Set:} Used to fit the model and update its internal parameters.
+    \item \textbf{Validation Set:} A holdout set from the training data used to tune hyperparameters and assess model performance during development.
+    \item \textbf{Test Set:} A final, untouched set used solely for evaluating the generalisation ability of the final model.
+\end{itemize}
+
+This three-way split ensures that hyperparameter optimisation remains decoupled from final evaluation, avoiding the pitfalls of data leakage.
+
+\subsubsection*{Cross-Validation}
+
+Using a single validation set can lead to instability—model performance may vary significantly depending on which subset is chosen. Furthermore, in data-constrained environments, reserving a separate validation set may reduce the amount of data available for training, leading to biased estimates of model performance.
+
+\textbf{K-fold cross-validation} provides a principled solution. The data is split into $K$ equally sized folds. For each fold:
+\begin{enumerate}
+    \item Train the model on the remaining $K-1$ folds.
+    \item Evaluate it on the $k^\text{th}$ fold (the validation fold).
+\end{enumerate}
+This process is repeated $K$ times, with each fold serving as the validation set once. The model’s performance is then averaged over all $K$ trials. This ensures that:
+\begin{itemize}
+    \item Every data point is used for both training and validation.
+    \item Variance from arbitrary splits is reduced.
+    \item Hyperparameter selection becomes more robust.
+\end{itemize}
+
+Typical values for $K$ range from 5 to 10, striking a balance between computational efficiency and robustness.
+
+\subsubsection*{Stratified Cross-Validation and Skewed Targets}
+
+In classification, datasets often exhibit class imbalance—where some classes dominate in frequency. This can bias evaluation. \textbf{Stratified cross-validation} preserves class proportions across folds, ensuring a fairer evaluation across all classes.
+
+In regression, the analogous issue arises when the target variable is highly skewed. Many regression models implicitly assume a normally distributed target. In such cases, one can apply transformations to the target variable:
+\begin{itemize}
+    \item \textbf{Logarithmic Transformation:} Useful when the target exhibits exponential growth.
+    \item \textbf{Box-Cox Transformation:} A family of power transformations that can normalise skewed distributions.
+\end{itemize}
+
+These transformations can improve linearity and model fit, thereby enhancing predictive accuracy and stability.
+
+
+\subsection{Regularisation in Regression and Classification}
+
+Regularisation is a technique used to prevent overfitting in both regression and classification models. Overfitting occurs when a model learns the noise in the training data rather than the underlying pattern, leading to poor generalisation to unseen data. Regularisation combats this by constraining the model’s flexibility, typically through penalising large coefficients in the objective function.
+
+\subsubsection*{Linear Regression and Overfitting}
+
+In ordinary least squares (OLS) linear regression, the model assumes a linear relationship between the features $x_i$ and the target variable $y$:
+\[
+\hat{y} = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \dots + \theta_n x_n = X\boldsymbol{\theta}
+\]
+Here, $X$ is the feature matrix (with a bias column of 1s), and $\boldsymbol{\theta}$ is the vector of model coefficients. The goal is to minimise the mean squared error (MSE):
+\[
+\mathcal{L}_{\text{OLS}} = \frac{1}{n} \sum_{i=1}^n \left(y_i - \hat{y}_i\right)^2
+\]
+However, in high-dimensional or noisy data, OLS can lead to large coefficient magnitudes, capturing noise and resulting in poor generalisation.
+
+\subsubsection*{The Regularised Cost Function}
+
+To address this, regularisation modifies the cost function by adding a penalty term that constrains the size of the coefficients:
+\[
+\mathcal{L}_{\text{reg}} = \text{MSE} + \lambda \cdot \text{Penalty}(\boldsymbol{\theta})
+\]
+The hyperparameter $\lambda$ controls the trade-off between fitting the data and keeping coefficients small.
+
+\subsubsection*{Ridge and Lasso Regression}
+
+Two of the most common regularisation methods are:
+
+\paragraph{Ridge Regression (L2 penalty):}
+\[
+\mathcal{L}_{\text{ridge}} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 + \lambda \sum_{j=1}^n \theta_j^2
+\]
+The L2 penalty shrinks all coefficients smoothly toward zero. It is especially effective in scenarios where all features contribute a little.
+
+\paragraph{Lasso Regression (L1 penalty):}
+\[
+\mathcal{L}_{\text{lasso}} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 + \lambda \sum_{j=1}^n |\theta_j|
+\]
+The L1 penalty can shrink some coefficients exactly to zero, effectively performing \emph{feature selection}. This sparsity makes lasso particularly useful when the number of features is large and only a subset is expected to be informative.
+
+\subsubsection*{Performance in Different Noise Environments}
+
+The effectiveness of each method varies by signal-to-noise ratio (SNR) and the sparsity of the true coefficients:
+
+\begin{itemize}
+    \item \textbf{High SNR, sparse coefficients:} Lasso excels by zeroing out irrelevant features while accurately identifying important ones.
+    \item \textbf{Low SNR, sparse coefficients:} Lasso remains robust, outperforming ridge and linear regression, which tend to overfit.
+    \item \textbf{High SNR, non-sparse coefficients:} All methods perform reasonably well; lasso identifies some zeros, while ridge is slightly more stable.
+    \item \textbf{Low SNR, non-sparse coefficients:} Ridge generally outperforms lasso in fitting non-zero coefficients, but lasso still performs well as a feature selector.
+\end{itemize}
+
+\subsubsection*{Empirical Comparison}
+
+Empirical plots comparing test predictions to actual values show that:
+\begin{itemize}
+    \item \textbf{Lasso regression} tracks actual values closely with predictions concentrated around the ideal diagonal.
+    \item \textbf{Ridge regression} performs better than standard linear regression in noisy settings.
+    \item \textbf{Linear regression} often overfits, especially in low SNR environments, resulting in erratic coefficient estimates and poor generalisation.
+\end{itemize}
+
+In a moderately noisy setting, lasso achieves significantly lower MSE than ridge and linear regression—up to 30 times smaller. This demonstrates the power of regularisation in producing generalisable models.
+
+\subsubsection*{Regularisation in Classification}
+
+Regularisation principles extend naturally to classification models, such as logistic regression. The cost function, often based on cross-entropy, is augmented by L1 or L2 penalties to prevent the model from overfitting the training data:
+\[
+\mathcal{L}_{\text{logistic-reg}} = \text{CrossEntropy}(\hat{y}, y) + \lambda \cdot \text{Penalty}(\boldsymbol{\theta})
+\]
+This is particularly useful in high-dimensional spaces, such as text classification, where sparsity and noise are common.
+\subsection{Data Leakage}
+
+Data leakage is a critical issue that arises when information from outside the 
+training dataset, typically unavailable during deployment—leaks into the model training process. This leads to artificially inflated model performance during validation and testing, but poor generalisation in real-world applications.
+
+\subsubsection*{What is Data Leakage?}
+
+Data leakage occurs when the training data includes information that would not be available at prediction time. For example, using a feature engineered from the entire dataset (e.g., the average home price) when predicting individual house prices introduces information from the test set into the training process. This scenario mimics having access to the future, which is unrealistic in production.
+
+\textbf{Data snooping} is a specific form of data leakage where information from the test set indirectly influences the training process, such as tuning hyperparameters based on test set performance or feature engineering using future labels.
+
+\subsubsection*{Consequences of Leakage}
+
+When data leakage is present:
+\begin{itemize}
+    \item The model appears to perform well on the test set.
+    \item Model evaluation metrics are misleading.
+    \item The deployed model underperforms, failing to replicate evaluation results.
+\end{itemize}
+
+Leakage invalidates the model validation pipeline, making the trained model unreliable.
+
+\subsubsection*{Common Sources of Data Leakage}
+
+\begin{itemize}
+    \item \textbf{Global statistics:} Using dataset-level aggregates (e.g., overall mean, standard deviation) during training.
+    \item \textbf{Temporal leakage:} Using future data to predict past or present values.
+    \item \textbf{Inappropriate feature engineering:} Deriving features from the entire dataset before splitting into training/test sets.
+    \item \textbf{Improper cross-validation:} Applying preprocessing steps (e.g., scaling, PCA) before the data is split into folds.
+\end{itemize}
+
+\subsubsection*{Preventing Data Leakage}
+
+To mitigate the risk of leakage:
+\begin{itemize}
+    \item Keep training, validation, and test sets strictly separate with no contamination.
+    \item Ensure feature engineering and preprocessing are performed within a pipeline fitted only on the training data.
+    \item Avoid global statistics computed using the full dataset.
+    \item For time-dependent data, use time-aware splits (e.g., \texttt{TimeSeriesSplit}) rather than random train-test splits.
+    \item During cross-validation, fit the pipeline separately within each fold to avoid leakage across folds.
+\end{itemize}
+
+
+
 \end{document}
