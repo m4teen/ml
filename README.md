@@ -16,7 +16,7 @@ This course provides a practical introduction to machine learning using Python, 
 - K-Means & Hierarchical Clustering
 
 
-## Example output
+## Example Output
 
 <p align="center">
   <img src="images/odds-ratio.png" alt="Feature Importance" width="350"/>
