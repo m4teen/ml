@@ -17,7 +17,7 @@ This course provides a practical introduction to machine learning using Python, 
 
 ## Reproducibility
 
-All datasets used in this project are publicly available and accessible via URL, requiring no local uploads. Each notebook includes the necessary code to download and process the data automatically. As such, cloning this repository and installing the dependencies listed in `requirements.txt` is sufficient to fully reproduce the results and visualisations.
+All datasets used in this project are publicly available and accessible via URL. Each notebook includes the necessary code to download and process the data automatically. As such, cloning this repository and installing the dependencies listed in `requirements.txt` is sufficient to fully reproduce the results and visualisations.
 
 ## Example Output
 
