@@ -38,7 +38,7 @@ All datasets used in this project are publicly available and accessible via URL.
 │   └── notes.pdf              # Compiled version of the notes
 │
 ├── notebooks/                # Jupyter notebooks used for EDA and modelling
-│   ├── assignment.ipynb       # Core model development notebook
+│   ├── notebook.ipynb       # Core model development notebook
 │   └── ...                    # Additional exploratory or experimental notebooks
 │
 ├── images/                    # Static plots and visual outputs from the analysis
